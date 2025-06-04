@@ -1,12 +1,28 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import Header from "@/components/store/Header";
+import ProductGrid from "@/components/store/ProductGrid";
+import Hero from "@/components/store/Hero";
+import Footer from "@/components/store/Footer";
 
 const Index = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-white">
+      <Header 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+      />
+      <Hero />
+      <ProductGrid 
+        searchTerm={searchTerm} 
+        selectedCategory={selectedCategory}
+      />
+      <Footer />
     </div>
   );
 };
