@@ -4,6 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
+import { Link } from "react-router-dom";
 
 interface Product {
   id: number;
@@ -21,8 +23,12 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
     toast({
       title: "Added to Cart",
       description: `${product.name} has been added to your cart.`,
@@ -41,53 +47,55 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Card className="group hover:shadow-lg transition-shadow duration-200">
-      <CardContent className="p-4">
-        <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          />
-        </div>
-        
-        <Badge variant="secondary" className="mb-2 capitalize">
-          {product.category}
-        </Badge>
-        
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-          {product.name}
-        </h3>
-        
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {product.description}
-        </p>
-        
-        <div className="flex items-center mb-3">
-          <div className="flex items-center space-x-1">
-            {renderStars(product.rating)}
+    <Link to={`/product/${product.id}`}>
+      <Card className="group hover:shadow-lg transition-shadow duration-200 h-full">
+        <CardContent className="p-4">
+          <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
           </div>
-          <span className="text-sm text-gray-500 ml-2">({product.rating})</span>
-        </div>
+          
+          <Badge variant="secondary" className="mb-2 capitalize">
+            {product.category}
+          </Badge>
+          
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+            {product.name}
+          </h3>
+          
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {product.description}
+          </p>
+          
+          <div className="flex items-center mb-3">
+            <div className="flex items-center space-x-1">
+              {renderStars(product.rating)}
+            </div>
+            <span className="text-sm text-gray-500 ml-2">({product.rating})</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-gray-900">
+              ${product.price}
+            </span>
+          </div>
+        </CardContent>
         
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-gray-900">
-            ${product.price}
-          </span>
-        </div>
-      </CardContent>
-      
-      <CardFooter className="p-4 pt-0">
-        <Button 
-          onClick={handleAddToCart}
-          className="w-full"
-          size="sm"
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Add to Cart
-        </Button>
-      </CardFooter>
-    </Card>
+        <CardFooter className="p-4 pt-0">
+          <Button 
+            onClick={handleAddToCart}
+            className="w-full"
+            size="sm"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to Cart
+          </Button>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 };
 

@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   searchTerm: string;
@@ -13,7 +15,7 @@ interface HeaderProps {
 }
 
 const Header = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCategory }: HeaderProps) => {
-  const [cartItems] = useState(0);
+  const { getTotalItems } = useCart();
   const categories = ["all", "electronics", "clothing", "home", "books"];
 
   return (
@@ -21,7 +23,9 @@ const Header = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold text-gray-900">ModernShop</h1>
+            <Link to="/">
+              <h1 className="text-2xl font-bold text-gray-900">ModernShop</h1>
+            </Link>
             <nav className="hidden md:flex space-x-6">
               {categories.map((category) => (
                 <button
@@ -36,6 +40,9 @@ const Header = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
                   {category === "all" ? "All Products" : category}
                 </button>
               ))}
+              <Link to="/admin" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                Admin
+              </Link>
             </nav>
           </div>
           
@@ -51,14 +58,16 @@ const Header = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
               />
             </div>
             
-            <Button variant="outline" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {cartItems > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                  {cartItems}
-                </Badge>
-              )}
-            </Button>
+            <Link to="/cart">
+              <Button variant="outline" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {getTotalItems() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {getTotalItems()}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             
             <Button variant="outline" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
