@@ -40,9 +40,6 @@ const Header = ({ searchTerm, setSearchTerm, selectedCategory, setSelectedCatego
                   {category === "all" ? "All Products" : category}
                 </button>
               ))}
-              <Link to="/admin" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                Admin
-              </Link>
             </nav>
           </div>
           
