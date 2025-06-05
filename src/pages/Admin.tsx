@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Package, Users, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,7 +14,7 @@ const Admin = () => {
   const { toast } = useToast();
   
   // Mock orders data
-  const [orders] = useState([
+  const [orders, setOrders] = useState([
     {
       id: "ORD-001",
       customer: {
@@ -78,6 +79,7 @@ const Admin = () => {
 
   const [activeTab, setActiveTab] = useState("orders");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -107,11 +109,55 @@ const Admin = () => {
     });
   };
 
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setNewProduct({
+      name: product.name,
+      price: product.price.toString(),
+      category: product.category,
+      stock: product.stock.toString(),
+      description: ""
+    });
+  };
+
+  const handleUpdateProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+
+    const updatedProduct = {
+      ...editingProduct,
+      name: newProduct.name,
+      price: parseFloat(newProduct.price),
+      category: newProduct.category,
+      stock: parseInt(newProduct.stock)
+    };
+
+    setProducts(products.map(p => p.id === editingProduct.id ? updatedProduct : p));
+    setEditingProduct(null);
+    setNewProduct({ name: "", price: "", category: "", stock: "", description: "" });
+    
+    toast({
+      title: "Product Updated",
+      description: `${updatedProduct.name} has been updated.`,
+    });
+  };
+
   const handleDeleteProduct = (id: number) => {
     setProducts(products.filter(p => p.id !== id));
     toast({
       title: "Product Deleted",
       description: "Product has been removed from the store.",
+    });
+  };
+
+  const handleOrderStatusChange = (orderId: string, newStatus: string) => {
+    setOrders(orders.map(order => 
+      order.id === orderId ? { ...order, status: newStatus } : order
+    ));
+    
+    toast({
+      title: "Order Status Updated",
+      description: `Order ${orderId} status changed to ${newStatus}.`,
     });
   };
 
@@ -215,6 +261,7 @@ const Admin = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -255,6 +302,18 @@ const Admin = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>{order.orderDate}</TableCell>
+                      <TableCell>
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleOrderStatusChange(order.id, e.target.value)}
+                          className="text-sm border rounded px-2 py-1"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -266,14 +325,14 @@ const Admin = () => {
         {/* Products Tab */}
         {activeTab === "products" && (
           <>
-            {/* Add Product Form */}
-            {showAddForm && (
+            {/* Add/Edit Product Form */}
+            {(showAddForm || editingProduct) && (
               <Card className="mb-8">
                 <CardHeader>
-                  <CardTitle>Add New Product</CardTitle>
+                  <CardTitle>{editingProduct ? "Edit Product" : "Add New Product"}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleAddProduct} className="grid grid-cols-2 gap-4">
+                  <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Product Name</Label>
                       <Input
@@ -323,8 +382,18 @@ const Admin = () => {
                       />
                     </div>
                     <div className="col-span-2 flex space-x-2">
-                      <Button type="submit">Add Product</Button>
-                      <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                      <Button type="submit">
+                        {editingProduct ? "Update Product" : "Add Product"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          setShowAddForm(false);
+                          setEditingProduct(null);
+                          setNewProduct({ name: "", price: "", category: "", stock: "", description: "" });
+                        }}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -355,7 +424,11 @@ const Admin = () => {
                           {product.status}
                         </Badge>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="icon">
+                          <Button 
+                            variant="outline" 
+                            size="icon"
+                            onClick={() => handleEditProduct(product)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
